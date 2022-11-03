@@ -12,6 +12,7 @@
 #define LOAD    LATBbits.LATB1
 #define CLK     LATBbits.LATB2
 
+int noDecodeModePacket[16] = {1,1,1,1,1,0,0,1,0,0,0,0,0,0,0,0};
 
 void main(void) {
     //ONE TIME SETUP:
@@ -21,12 +22,63 @@ void main(void) {
     DIN = 0;
     LOAD = 0;
     CLK = 0;
+    
+    LOAD = 1;
+    __delay_ms(250);
+    LOAD = 0;
     //INFINITE LOOP:
     while(1)
     {
         
     }//end while
 }//end main
+
+void clearDotMatrixDisplay(void)
+{
+    //clear all the leds that are currently on at startup:
+    
+}
+
+void setNoDecodeMode(void)
+{
+    //set chip to no decode mode:
+    //decode mode address register: 0xF9
+    //no decode mode data: 0x00
+    //16 bit data packet order:
+    // D15 D14 D13 D12 D11 D10 D9 D8 D7 D6 D5 D4 D3 D2 D1 D0
+    //  1   1   1   1   1   0   0  1  0  0  0  0  0  0  0  0  
+    //        F               9            0           0  
+    //      0xF9    0x00
+    
+    //D15 D14 D13 D12         -> Dont Care bits
+    //D11 D10 D9 D8           -> Address bits
+    //D7 D6 D5 D4 D3 D2 D1 D0 -> Data byte
+    
+    //make sure all pins are low:
+    //Make these pins LOW:
+    DIN = 0;
+    LOAD = 0;
+    CLK = 0;
+    
+    int i = 0;
+    //Clock in the 16Bit packet to set decode mode to: No decode mode
+    for(i = 0; i < 16; i++)
+    {
+        if(noDecodeModePacket[i] == 1)
+        {//if data bit is a 1, then set DIN to 1:
+            DIN = 1;
+        }
+        else
+        {//if data bit is a 0, then set DIN to 0:
+            DIN = 0;
+        }
+        //After setting the DIN pin state, toggle the clock pin:
+        CLK = 1;//Valid data IN falls on rising edge of the CLK
+        __delay_ms(1);
+        CLK = 0;//Valid data OUT falls on falling edge of CLK
+        __delay_ms(1);
+    }
+}
 
 void ledTest(void)
 {
