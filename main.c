@@ -34,6 +34,8 @@ void main(void) {
     LOAD = 1;
     __delay_ms(250);
     LOAD = 0;
+    setNoDecodeMode();
+    ledTestMode();
     //INFINITE LOOP:
     while(1)
     {
@@ -76,14 +78,14 @@ void setNoDecodeMode(void)
         }
         //After setting the DIN pin state, toggle the clock pin:
         CLK = 1;//Valid data IN falls on rising edge of the CLK
-        __delay_ms(1);
+        //__delay_ms(1);
         CLK = 0;//Valid data OUT falls on falling edge of CLK
-        __delay_ms(1);
+        //__delay_ms(1);
     }
     //Done setting Decode mode operation.
     //Latch Output to save data into memory of max7219
     LOAD = 1;
-    __delay_ms(10);
+    //__delay_ms(10);
     LOAD = 0;
 }
 
@@ -124,14 +126,14 @@ void ledTestMode(void)
         }
         //After setting the DIN pin state, toggle the clock pin:
         CLK = 1;//Valid data IN falls on rising edge of the CLK
-        __delay_ms(1);
+        //__delay_ms(1);
         CLK = 0;//Valid data OUT falls on falling edge of CLK
-        __delay_ms(1);
+        //__delay_ms(1);
     }
     //Done setting Decode mode operation.
     //Latch Output to save data into memory of max7219
     LOAD = 1;
-    __delay_ms(10);
+    //__delay_ms(10);
     LOAD = 0;
     
     
