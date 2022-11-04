@@ -18,6 +18,8 @@ void writeToMax7219(int address[16]);
 //Variables Goes Here:
 //16 bit data packet order:
 // D15 D14 D13 D12 D11 D10 D9 D8 D7 D6 D5 D4 D3 D2 D1 D0
+
+//TODO: change this into one Byte packets, NOT 16Bit Packets!! 16Bit packets does not work...
 int noDecodeModePacket[16]  = {0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0};//0x09 0x00
 int setScanLimitPacket[16]  = {0,0,0,0,1,0,1,1,0,0,0,0,0,1,1,1};//0x0B 0x??
 int ledTestModePacket[16]   = {1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1};//0xFF 0x01
@@ -53,6 +55,7 @@ void main(void) {
     }//end while
 }//end main
 
+//
 void writeToMax7219(int address[16])
 {
     //make sure all pins are low:
@@ -63,8 +66,9 @@ void writeToMax7219(int address[16])
     
     int i = 0;
     //Clock in the 16Bit packet to set decode mode to: No decode mode
-    for(i = 0; i < 16; i++)
+    for(i = 0; i < 16; i++)//make this to one byte NOT 2 bytes!!!
     {
+        CLK = 0;//Valid data OUT falls on falling edge of CLK
         if(address[i] == 1)
         {//if data bit is a 1, then set DIN to 1:
             DIN = 1;
@@ -75,9 +79,6 @@ void writeToMax7219(int address[16])
         }
         //After setting the DIN pin state, toggle the clock pin:
         CLK = 1;//Valid data IN falls on rising edge of the CLK
-        __delay_ms(1);
-        CLK = 0;//Valid data OUT falls on falling edge of CLK
-        __delay_ms(1);
     }
     //Done setting Decode mode operation.
     //Latch Output to save data into memory of max7219
