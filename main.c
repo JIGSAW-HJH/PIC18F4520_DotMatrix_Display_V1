@@ -13,19 +13,24 @@
 #define CLK     LATBbits.LATB2
 
 //Prototypes goes here:
-void setNoDecodeMode(void);
-void ledTestMode(void);
+void writeToMax7219(int address[16]);
 
 //Variables Goes Here:
+//16 bit data packet order:
+// D15 D14 D13 D12 D11 D10 D9 D8 D7 D6 D5 D4 D3 D2 D1 D0
 int noDecodeModePacket[16]  = {1,1,1,1,1,0,0,1,0,0,0,0,0,0,0,0};//0xF9 0x00
+int setScanLimitPacket[16]  = {0,0,0,0,1,0,1,1,0,0,0,0,0,1,1,1};//0x0B 0x??
 int ledTestModePacket[16]   = {1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1};//0xFF 0x01
 int NormalModePacket[16]    = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0};//0xFF 0xFE
-
+int shutdownModeON[16]      = {1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0};//0xFC 0x00
+int shutdownModeOFF[16]     = {1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1};//0xFC 0xFF
 
 void main(void) {
     //ONE TIME SETUP:
     TRISB = 0;// make all pins outputs on portB
-    
+    TRISCbits.RC5 = 0;//SDO PIN SPI Serial data output
+    TRISCbits.RC4 = 1;//SDI PIN SPI Serial data input
+    TRISCbits.RC3 = 0;//SCLK PIN SPI Serial data clock output
     //Make these pins LOW:
     DIN = 0;
     LOAD = 0;
@@ -34,8 +39,12 @@ void main(void) {
     LOAD = 1;
     __delay_ms(250);
     LOAD = 0;
-    setNoDecodeMode();
-    ledTestMode();
+    //writeToMax7219(noDecodeModePacket);//set decode mode to NO-Decode
+    //writeToMax7219(ledTestModePacket);//Test all leds on the matrix by switching them all on
+    //writeToMax7219(setScanLimitPacket);//display all digits 0-7
+    __delay_ms(250);
+    //writeToMax7219(NormalModePacket);//switch back to normal mode, matrix leds off
+    writeToMax7219(shutdownModeON);
     //INFINITE LOOP:
     while(1)
     {
@@ -43,21 +52,8 @@ void main(void) {
     }//end while
 }//end main
 
-void setNoDecodeMode(void)
+void writeToMax7219(int address[16])
 {
-    //set chip to no decode mode:
-    //decode mode address register: 0xF9
-    //no decode mode data: 0x00
-    //16 bit data packet order:
-    // D15 D14 D13 D12 D11 D10 D9 D8 D7 D6 D5 D4 D3 D2 D1 D0
-    //  1   1   1   1   1   0   0  1  0  0  0  0  0  0  0  0  
-    //        F               9            0           0  
-    //      0xF9    0x00
-    
-    //D15 D14 D13 D12         -> Dont Care bits
-    //D11 D10 D9 D8           -> Address bits
-    //D7 D6 D5 D4 D3 D2 D1 D0 -> Data byte
-    
     //make sure all pins are low:
     //Make these pins LOW:
     DIN = 0;
@@ -68,7 +64,7 @@ void setNoDecodeMode(void)
     //Clock in the 16Bit packet to set decode mode to: No decode mode
     for(i = 0; i < 16; i++)
     {
-        if(noDecodeModePacket[i] == 1)
+        if(address[i] == 1)
         {//if data bit is a 1, then set DIN to 1:
             DIN = 1;
         }
@@ -78,63 +74,13 @@ void setNoDecodeMode(void)
         }
         //After setting the DIN pin state, toggle the clock pin:
         CLK = 1;//Valid data IN falls on rising edge of the CLK
-        //__delay_ms(1);
+        __delay_ms(1);
         CLK = 0;//Valid data OUT falls on falling edge of CLK
-        //__delay_ms(1);
+        __delay_ms(1);
     }
     //Done setting Decode mode operation.
     //Latch Output to save data into memory of max7219
     LOAD = 1;
-    //__delay_ms(10);
+    __delay_ms(10);
     LOAD = 0;
-}
-
-void ledTestMode(void)
-{
-    //16 bit data packet order:
-    // D15 D14 D13 D12 D11 D10 D9 D8 D7 D6 D5 D4 D3 D2 D1 D0
-    //  1   1   1   1   1   1   1  1  0  0  0  0  0  0  0  1
-    //        F               F             0       1
-    //     0xFF     0x01
-    
-    //D15 D14 D13 D12         -> Dont Care bits
-    //D11 D10 D9 D8           -> Address bits
-    //D7 D6 D5 D4 D3 D2 D1 D0 -> Data byte
-    
-    //Test all LEDs on the connected matrices:
-    //Display test address: 0xXF    X -> Dont care, thus use 0xFF
-    //Display test Data: 0xFF
-    //Thus we need to send two bytes of 0xFF to max7219 chip
-    
-    //make sure all pins are low:
-    //Make these pins LOW:
-    DIN = 0;
-    LOAD = 0;
-    CLK = 0;
-    
-    int i = 0;
-    //Clock in the 16Bit packet to set decode mode to: No decode mode
-    for(i = 0; i < 16; i++)
-    {
-        if(ledTestModePacket[i] == 1)
-        {//if data bit is a 1, then set DIN to 1:
-            DIN = 1;
-        }
-        else
-        {//if data bit is a 0, then set DIN to 0:
-            DIN = 0;
-        }
-        //After setting the DIN pin state, toggle the clock pin:
-        CLK = 1;//Valid data IN falls on rising edge of the CLK
-        //__delay_ms(1);
-        CLK = 0;//Valid data OUT falls on falling edge of CLK
-        //__delay_ms(1);
-    }
-    //Done setting Decode mode operation.
-    //Latch Output to save data into memory of max7219
-    LOAD = 1;
-    //__delay_ms(10);
-    LOAD = 0;
-    
-    
 }

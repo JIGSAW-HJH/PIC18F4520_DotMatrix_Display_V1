@@ -5,6 +5,10 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>config.h</itemPath>
+      <itemPath>SoftwarePins_SPI.h</itemPath>
+      <itemPath>SoftwareSPI.h</itemPath>
+      <itemPath>MAX7219_Config.h</itemPath>
+      <itemPath>MAX7219.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
