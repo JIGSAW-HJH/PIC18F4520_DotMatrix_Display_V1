@@ -41,5 +41,45 @@ void MAX7219_setup(char chip)
   MAX7219_write(DISPLAY_TEST_REG,DISABLE_TEST,chip);   
 }
 
+//WRITE FUNCTION FOR THE MAX7219 CHIP:
+void MAX7219_write(char registerName,char registerData,char chip)
+{
+  CS0 = 0;  //Pull the LOAD pin of the max7219 to 0
+   
+  write_SPI(registerName); //First write the register to update,
+  write_SPI(registerData); //Then write the data for that register to update
+  //For the rest of the other chips, do not update anything to them:
+  while(chip--)
+       MAX7219_NoOperation();        //Used for daisy chained (Cascaded) arrangements
+  
+  CS0 = 1;  //Set the LOAD pin of the max7219 to 1 (latch the output)
+}
+
+//FUNCTION TO DISPLAY TECT ON TO THE DOT MATRIC DISPLAY:
+void MAX7219_displayText(char* text)// example of text: "HELLO", thus its actually an array of chars, thats why the pointer is there...
+{ 
+  char chip = 0;// start at the 1st chip (aka the MSB chip, the last one)
+ 
+  while(*text)
+  { 
+    //(Text-32)...because the first 32 ASCII character codes are none Printable (control chars)
+    char row = (*text++) - 32;//convert your text to ascii range..
+    //the ++ next to text is to increment the "array" of text to the next character
+    for(int col = 0; col < 8; col++)
+    {
+      MAX7219_write( col, symbol[row][col], chip );
+    }
+    
+    chip++;// go to the next chip, (aka previous chip)
+  }
+}
+
+//FUNCTION TO PASS ON THE DATA TO THE NEXT CHIP: (Basically its a NOP)
+void MAX7219_NoOperation()
+{
+  write_SPI(NO_OP_REG);           
+  write_SPI(0x00);       //Don't care (Can be any arbitrary value)
+}
+
 #endif	/* XC_HEADER_TEMPLATE_H */
 

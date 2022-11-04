@@ -18,7 +18,7 @@ void writeToMax7219(int address[16]);
 //Variables Goes Here:
 //16 bit data packet order:
 // D15 D14 D13 D12 D11 D10 D9 D8 D7 D6 D5 D4 D3 D2 D1 D0
-int noDecodeModePacket[16]  = {1,1,1,1,1,0,0,1,0,0,0,0,0,0,0,0};//0xF9 0x00
+int noDecodeModePacket[16]  = {0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0};//0x09 0x00
 int setScanLimitPacket[16]  = {0,0,0,0,1,0,1,1,0,0,0,0,0,1,1,1};//0x0B 0x??
 int ledTestModePacket[16]   = {1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1};//0xFF 0x01
 int NormalModePacket[16]    = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0};//0xFF 0xFE
@@ -31,6 +31,7 @@ void main(void) {
     TRISCbits.RC5 = 0;//SDO PIN SPI Serial data output
     TRISCbits.RC4 = 1;//SDI PIN SPI Serial data input
     TRISCbits.RC3 = 0;//SCLK PIN SPI Serial data clock output
+    
     //Make these pins LOW:
     DIN = 0;
     LOAD = 0;

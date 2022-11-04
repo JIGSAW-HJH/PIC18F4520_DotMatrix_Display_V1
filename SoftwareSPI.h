@@ -13,7 +13,7 @@
 #include "SoftwarePins_SPI.h";//include the software SPI pins config
 
 //INITIALISE THE SPI PIN CONFIGURATIONS FOR SPI
-void SPI_initialise(void)
+void initialise_SPI(void)
 {
     SCLKpin     = 0;    //Set this pin as an output pin
     SDOUTpin    = 0;    //Set this pin as an output pin

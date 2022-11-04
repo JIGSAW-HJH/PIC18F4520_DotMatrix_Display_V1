@@ -9,6 +9,7 @@
       <itemPath>SoftwareSPI.h</itemPath>
       <itemPath>MAX7219_Config.h</itemPath>
       <itemPath>MAX7219.h</itemPath>
+      <itemPath>ASCII_Characters.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
